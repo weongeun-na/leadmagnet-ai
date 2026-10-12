@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="주제와 7가지 질문으로 나에게 맞는 리드마그넷 유형과 제목·구성안·랜딩 카피를 추천받는 무료 진단 도구">
+<title>리드마그넷 추천기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: 한 장짜리 도구. 질문 카드 → 추천 결과 → 이메일 게이트 → 전체 리포트 순으로 같은 폭에서 아래로 이어진다. */
+:root{
+  --bg:#F3F4F8; --surface:#FFFFFF; --ink:#14182B; --muted:#5B6277; --line:#E1E4EE;
+  --accent:#2A56B8; --accent-ink:#FFFFFF; --accent-soft:#E6ECFA; --warn:#B4540A; --warn-soft:#FDF0E1;
+  --c-ebook:#7C4DDB; --c-quiz:#D9820B; --c-check:#169A6F; --c-guide:#2F6FE0; --c-tmpl:#5B5BD6; --c-case:#D1397A;
+  --font-body:"Noto Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1120; --surface:#171B2E; --ink:#ECEEF7; --muted:#9BA2BA; --line:#2A2F49;
+  --accent:#86A8F5; --accent-ink:#0E1120; --accent-soft:#222A47; --warn:#F0A460; --warn-soft:#33261A;
+  --c-ebook:#A98BF0; --c-quiz:#F0A93F; --c-check:#3CC796; --c-guide:#6B9BF5; --c-tmpl:#8D8DF0; --c-case:#EE6FA3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1120; --surface:#171B2E; --ink:#ECEEF7; --muted:#9BA2BA; --line:#2A2F49;
+  --accent:#86A8F5; --accent-ink:#0E1120; --accent-soft:#222A47; --warn:#F0A460; --warn-soft:#33261A;
+  --c-ebook:#A98BF0; --c-quiz:#F0A93F; --c-check:#3CC796; --c-guide:#6B9BF5; --c-tmpl:#8D8DF0; --c-case:#EE6FA3; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.65;font-size:15px;padding-inline:16px;padding-block:28px 64px;word-break:keep-all;overflow-wrap:anywhere}
+.wrap{max-width:860px;margin-inline:auto;display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-size:clamp(26px,5vw,36px);line-height:1.25;margin:4px 0 8px;font-weight:900;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:20px;margin:0;font-weight:700;text-wrap:balance}
+h3{font-size:16px;margin:0;font-weight:700}
+p{margin:0}
+.lead{color:var(--muted);max-width:60ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px}
+.sample-note{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.sample-note b{font-family:var(--font-mono);font-weight:500;font-size:11px;padding:2px 7px;border-radius:5px;background:var(--accent-soft);color:var(--accent)}
+form{display:flex;flex-direction:column;gap:22px}
+.q{display:flex;flex-direction:column;gap:9px;border:0;padding:0;margin:0;min-width:0}
+.q legend{font-weight:700;padding:0;margin-bottom:2px}
+.q .hint{font-size:13px;color:var(--muted);font-weight:400;margin-left:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.chip span{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:999px;font-size:14px;background:var(--bg);transition:background .15s,border-color .15s}
+.chip input:checked + span{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+.chip input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+input[type=text],input[type=email]{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+input[type=text]:focus-visible,input[type=email]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:13px 22px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.err{color:var(--warn);font-size:13px;min-height:18px}
+#analyzing{text-align:center;padding:40px 16px;color:var(--muted)}
+.dots{display:inline-flex;gap:6px;margin-bottom:10px}
+.dots i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:b 1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,80%,100%{opacity:.25}40%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.dots i{animation:none}}
+.pick{display:flex;flex-direction:column;gap:14px}
+.pick .tag{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--muted)}
+.pick .dot{width:10px;height:10px;border-radius:3px;background:var(--tc)}
+.pick .name{font-size:clamp(28px,6vw,40px);font-weight:900;line-height:1.2;letter-spacing:-.01em}
+.fit{display:flex;align-items:baseline;gap:8px}
+.fit b{font-family:var(--font-mono);font-size:30px;font-weight:500;color:var(--tc);font-variant-numeric:tabular-nums}
+.fit span{color:var(--muted);font-size:13px}
+.reasons{display:flex;flex-direction:column;gap:8px;padding:0;margin:0;list-style:none}
+.reasons li{padding-left:18px;position:relative}
+.reasons li::before{content:"";position:absolute;left:2px;top:.7em;width:7px;height:7px;border-radius:2px;background:var(--tc)}
+.reasons small{display:block;color:var(--muted);font-size:13px}
+.warnbox{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:12px 14px;font-size:14px}
+.bars{display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:minmax(78px,110px) 1fr 44px;gap:10px;align-items:center;font-size:14px}
+.bar .track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.bar .fill{height:100%;background:var(--tc);border-radius:6px}
+.bar .v{font-family:var(--font-mono);font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.bar.top .nm{font-weight:700}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.kv{background:var(--bg);border-radius:10px;padding:12px 14px;min-width:0}
+.kv small{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.kv div{font-weight:700;margin-top:2px}
+.preview-title{font-weight:700;margin-bottom:6px}
+.gate-wrap{position:relative}
+.locked{display:flex;flex-direction:column;gap:14px;opacity:.55;pointer-events:none;user-select:none}
+.sk{display:flex;flex-direction:column;gap:7px}
+.sk i{display:block;height:9px;border-radius:5px;background:var(--line)}
+.sk i:nth-child(2){width:86%}.sk i:nth-child(3){width:64%}
+.gate{margin-top:-60px;position:relative;z-index:1;border:1px solid var(--accent);box-shadow:0 10px 30px rgba(20,24,43,.12)}
+.gate form{gap:12px}
+.consent{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--muted)}
+.consent input{margin-top:4px}
+.fine{font-size:12px;color:var(--muted)}
+.report{display:flex;flex-direction:column;gap:18px}
+.sec{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--line)}
+.sec:first-child{border-top:0;padding-top:0}
+.sec h3 .idx{font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-right:8px;font-weight:500}
+.sec ul,.sec ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px}
+.copyline{background:var(--bg);border-radius:10px;padding:12px 14px}
+.copyline b{display:block;font-size:12px;font-family:var(--font-mono);font-weight:500;color:var(--muted);letter-spacing:.05em}
+.mail{background:var(--bg);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.mail .when{font-family:var(--font-mono);font-size:12px;color:var(--accent)}
+.alt{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.alt .kv{border-left:3px solid var(--tc)}
+a.btn{display:inline-block;text-decoration:none;text-align:center}
+.cta{background:var(--accent-soft);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.cta b{font-size:16px}
+[hidden]{display:none!important}
+@media (max-width:520px){.bar{grid-template-columns:78px 1fr 40px}.card{padding:16px}}
+html{-webkit-text-size-adjust:100%}body{margin:0}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Lead Magnet Finder · 무료 진단</div>
+    <h1>우리 비즈니스에 맞는 리드마그넷, 1분이면 정해집니다</h1>
+    <p class="lead">주제와 일곱 가지 질문에 답하면 전자책·자가진단·체크리스트·실행 가이드·템플릿·사례 연구 중 가장 잘 맞는 유형과 제목, 구성안, 랜딩 카피를 만들어 드립니다.</p>
+  </header>
+
+  <section class="card" id="formCard" aria-labelledby="fh">
+    <h2 id="fh" class="eyebrow" style="font-weight:500">질문 입력</h2>
+    <p class="sample-note" style="margin:8px 0 18px"><b>예시</b> 아래 답변은 예시 값입니다. 내 상황에 맞게 바꿔 주세요.</p>
+    <form id="form" novalidate></form>
+  </section>
+
+  <section id="analyzing" class="card" hidden aria-live="polite">
+    <div class="dots"><i></i><i></i><i></i></div>
+    <div>답변을 6개 유형에 대조해 점수를 매기고 있습니다</div>
+  </section>
+
+  <div id="result" hidden class="wrap" style="gap:20px"></div>
+</div>
+
+<script>
+/* ───────── 데이터 ───────── */
+var TYPES=[
+ {k:'ebook',name:'전자책 (eBook)',short:'전자책',c:'--c-ebook',diff:'상',days:'5~7일',fmt:'PDF 12~20쪽, 모바일 세로형'},
+ {k:'quiz',name:'자가진단',short:'자가진단',c:'--c-quiz',diff:'중',days:'3~5일',fmt:'웹 설문 10~15문항 + 결과 리포트'},
+ {k:'check',name:'체크리스트',short:'체크리스트',c:'--c-check',diff:'하',days:'1~2일',fmt:'PDF 1~3쪽, 인쇄 가능한 점검표'},
+ {k:'guide',name:'실행 가이드',short:'실행 가이드',c:'--c-guide',diff:'중',days:'3~4일',fmt:'PDF 6~10쪽, 단계별 따라하기'},
+ {k:'tmpl',name:'템플릿',short:'템플릿',c:'--c-tmpl',diff:'하',days:'1~3일',fmt:'스프레드시트·문서 양식 + 사용법 1쪽'},
+ {k:'case',name:'사례 연구',short:'사례 연구',c:'--c-case',diff:'중',days:'3~5일',fmt:'PDF 4~6쪽, 문제→과정→결과 구조'}
+];
+var Q=[
+ {key:'offer',short:'판매 형태',label:'무엇을 파시나요?',type:'single',opts:[
+  {v:'physical',l:'상품(쇼핑몰·제조)',w:{check:1,tmpl:1,case:2}},
+  {v:'service',l:'서비스·컨설팅',w:{quiz:2,case:2}},
+  {v:'edu',l:'강의·교육·코칭',w:{ebook:2,guide:2}},
+  {v:'b2b',l:'B2B 솔루션·대리점 모집',w:{case:2,quiz:1,ebook:1}}]},
+ {key:'stage',short:'고객 인식 단계',label:'잠재 고객은 지금 어떤 상태인가요?',type:'single',opts:[
+  {v:'unaware',l:'문제가 있는지도 잘 모른다',w:{quiz:3,ebook:2,check:1}},
+  {v:'problem',l:'문제는 알지만 해결법을 모른다',w:{guide:2,check:2,ebook:1,tmpl:1}},
+  {v:'solution',l:'해결 방법을 비교하는 중이다',w:{case:3,guide:1,tmpl:1}}]},
+ {key:'pain',short:'고객의 가장 큰 장벽',label:'고객이 가장 힘들어하는 것은?',type:'single',opts:[
+  {v:'dontknow',l:'뭐가 문제인지 모르겠다',w:{quiz:3}},
+  {v:'howto',l:'어떻게 하는지 모르겠다',w:{guide:3,check:1}},
+  {v:'time',l:'시간이 없고 귀찮다',w:{tmpl:3,check:2}},
+  {v:'trust',l:'정말 효과 있는지 못 믿겠다',w:{case:3}}]},
+ {key:'goal',short:'1차 목표',label:'리드마그넷으로 얻고 싶은 것은?',type:'single',opts:[
+  {v:'email',l:'이메일(연락처) 수집량',w:{check:2,tmpl:2,quiz:1}},
+  {v:'consult',l:'상담·미팅 신청',w:{quiz:3,case:2}},
+  {v:'purchase',l:'바로 구매 전환',w:{tmpl:2,case:2,check:1}},
+  {v:'trust',l:'전문성·신뢰 확보',w:{ebook:3,case:2,guide:1}}]},
+ {key:'price',short:'객단가',label:'주력 상품의 가격대는?',type:'single',opts:[
+  {v:'low',l:'10만 원 미만',w:{tmpl:2,check:2}},
+  {v:'mid',l:'10만~100만 원',w:{guide:2,quiz:1,ebook:1}},
+  {v:'high',l:'100만 원 이상',w:{case:3,quiz:2,ebook:1}}]},
+ {key:'assets',short:'보유 자산',label:'이미 가진 자료를 모두 골라 주세요',hint:'복수 선택',type:'multi',opts:[
+  {v:'reviews',l:'후기·성공 사례',w:{case:2}},
+  {v:'expertise',l:'정리된 전문 지식·노하우',w:{ebook:2,guide:1}},
+  {v:'forms',l:'반복해서 쓰는 양식·계산표',w:{tmpl:3,check:1}},
+  {v:'data',l:'진단 기준·비교 데이터',w:{quiz:2}}]},
+ {key:'capacity',short:'제작 여력',label:'제작에 쓸 수 있는 시간은?',type:'single',opts:[
+  {v:'1d',l:'하루 안에',w:{check:2,tmpl:1,ebook:-2,quiz:-1}},
+  {v:'3d',l:'3일 정도',w:{quiz:1,guide:1,tmpl:1}},
+  {v:'1w',l:'일주일 이상',w:{ebook:2,quiz:1,guide:1,case:1}}]}
+];
+/* 운영자 설정: 카카오 채널 상담 주소(예: https://pf.kakao.com/_xxxxx). 비워 두면 버튼이 비활성으로 표시됩니다. */
+var KAKAO_URL='';
+var SAMPLE={topic:'쇼핑몰 상세페이지 전환율 높이기',offer:'service',stage:'problem',pain:'howto',goal:'consult',price:'mid',assets:['expertise','data'],capacity:'3d'};
+
+var WHY={
+ ebook:{stage:'아직 문제를 깊이 모르는 고객에게는 배경부터 설명해 주는 긴 형식이 신뢰를 쌓습니다.',pain:'',goal:'전문성을 보여 주는 데에는 분량 있는 자료가 가장 강합니다.',price:'검토 기간이 긴 상품일수록 읽을 거리가 있는 자료가 도움이 됩니다.',assets:'정리된 노하우가 있으면 새로 만드는 부담이 줄어듭니다.'},
+ quiz:{stage:'문제를 모르는 고객은 스스로 점수를 확인할 때 움직입니다.',pain:'‘뭐가 문제인지 모르겠다’는 고객에게는 진단 결과가 가장 빠른 답입니다.',goal:'진단 결과가 곧 상담 제안의 근거가 되어 상담 신청으로 이어집니다.',price:'객단가가 높을수록 고객 상태를 먼저 파악하는 과정이 필요합니다.',assets:'진단 기준과 비교 데이터가 있으면 점수 로직을 바로 만들 수 있습니다.'},
+ check:{stage:'해결법을 찾는 고객에게는 바로 따라 할 수 있는 점검표가 부담이 없습니다.',pain:'시간이 없는 고객은 한 장짜리 점검표를 가장 쉽게 받아들입니다.',goal:'가볍고 빨리 만들 수 있어 연락처 수집량을 늘리기 좋습니다.',price:'낮은 객단가에는 짧은 자료가 전환 속도에 맞습니다.',assets:'반복해서 쓰는 양식이 있으면 점검 항목으로 바로 바꿀 수 있습니다.'},
+ guide:{stage:'방법을 찾는 고객에게는 단계별 순서가 가장 직접적인 답입니다.',pain:'‘어떻게 하는지 모르겠다’는 고객에게는 따라 하는 순서가 핵심입니다.',goal:'방법을 알려 주며 전문성도 함께 보여 줄 수 있습니다.',price:'중간 가격대 상품은 직접 해 보게 한 뒤 도움을 제안하는 흐름이 잘 맞습니다.',assets:'정리된 노하우가 있으면 순서만 잡아 바로 가이드로 만들 수 있습니다.'},
+ tmpl:{stage:'해결법을 알고 있는 고객은 바로 쓸 수 있는 도구를 반깁니다.',pain:'시간이 없는 고객에게는 채우기만 하면 되는 양식이 가장 큰 도움입니다.',goal:'즉시 쓸 수 있어 수집과 구매 전환 모두에 기여합니다.',price:'낮은 객단가 상품은 사용 경험이 곧 구매로 이어지기 쉽습니다.',assets:'이미 쓰는 양식을 정리해 배포하면 제작이 거의 끝납니다.'},
+ case:{stage:'비교 단계의 고객은 실제로 해낸 사례를 가장 신뢰합니다.',pain:'‘정말 효과 있나’라는 불신에는 결과를 보여 주는 사례가 직접적인 답입니다.',goal:'고객이 먼저 확인하고 싶어 하는 증거를 보여 주어 상담과 구매를 당깁니다.',price:'비싼 상품일수록 검증된 사례가 구매 결정을 돕습니다.',assets:'후기와 성공 사례가 있으면 바로 구조만 잡으면 됩니다.'}
+};
+var CAUTION={
+ ebook:'분량이 길수록 끝까지 읽는 사람이 줄어듭니다. 요약 한 장을 맨 앞에 두세요.',
+ quiz:'결과 화면이 약하면 효과가 없습니다. 점수 구간별 처방을 먼저 설계하세요.',
+ check:'너무 쉽게 만들면 가치가 낮아 보입니다. 항목마다 이유를 한 줄씩 붙이세요.',
+ guide:'모든 걸 담으려 하면 길어집니다. 한 가지 목표만 달성하는 순서로 줄이세요.',
+ tmpl:'양식만 주면 쓰는 법을 몰라 방치됩니다. 작성 예시를 함께 넣으세요.',
+ case:'고객 동의 없이 이름·수치를 쓰면 분쟁이 생길 수 있습니다. 공개 동의를 먼저 받으세요.'
+};
+
+/* ───────── 콘텐츠 생성 ───────── */
+function build(k,t,ctx){
+ var T="‘"+t+"’";
+ var C={
+ ebook:{
+  titles:[T+' 처음부터 끝까지 정리한 입문서',T+' 10분 요약본: 핵심만 모았습니다',T+' 현장 사례로 배우는 실전 노트',T+' 시작 전에 알아야 할 9가지',T+' 틀리기 쉬운 포인트 정리집'],
+  outline:['표지와 한 장 요약','1장. '+T+', 지금 왜 중요한가','2장. 가장 흔한 오해 3가지','3장. 핵심 원리 한 장 정리','4장. 따라 하는 순서와 사례','5장. 다음 단계와 도움받는 방법'],
+  land:{h:T+', 이 한 권으로 감을 잡으세요',sub:'바로 읽을 수 있는 PDF로 핵심만 정리했습니다. 이메일을 남기면 즉시 받아볼 수 있습니다.',btn:'무료 전자책 받기',proof:'읽는 데 20분이면 충분한 분량입니다.'},
+  bridge:'5장 마지막에 ‘내 상황에 맞춰 같이 정리해 보기’ 상담 안내를 넣으세요. 읽은 내용을 자기 사례로 바꾸고 싶은 사람이 신청합니다.',
+  mails:['즉시 발송: 전자책 링크와 ‘가장 먼저 읽을 장’ 안내','2일 뒤: 책에 담지 못한 사례 1개와 질문 한 가지','5일 뒤: 읽은 내용을 적용해 보는 상담 또는 상품 안내']},
+ quiz:{
+  titles:[T+' 자가진단 12문항',T+' 우리 가게는 몇 점일까? 3분 진단',T+' 막히는 지점 찾기 테스트',T+' 현재 수준 점검표와 맞춤 처방',T+' 놓치고 있는 3가지 찾아보기'],
+  outline:['시작 화면: 소요 시간과 얻는 것','문항 1~4: 현재 상태 (사실 위주)','문항 5~8: 지금까지 해 본 방법','문항 9~12: 목표와 제약','결과 화면: 점수와 구간별 진단','맞춤 처방 3가지와 다음 행동'],
+  land:{h:T+', 지금 몇 점인지 3분 안에 확인하세요',sub:'12문항에 답하면 막히는 지점과 우선순위를 알려 드립니다.',btn:'진단 시작하기',proof:'점수 요약은 바로 보이고, 상세 처방은 이메일로 보내 드립니다.'},
+  bridge:'결과 화면의 낮은 점수 항목에 맞춰 ‘이 부분만 같이 점검해 드립니다’ 상담 버튼을 붙이세요. 점수가 상담의 근거가 됩니다.',
+  mails:['즉시 발송: 상세 진단 리포트와 점수 구간 설명','2일 뒤: 가장 낮은 항목 한 가지를 고치는 방법','5일 뒤: 진단 결과를 바탕으로 한 무료 상담 제안']},
+ check:{
+  titles:[T+' 체크리스트 15가지',T+' 시작 전 점검표',T+' 놓치기 쉬운 항목 한 장 정리',T+' 실행 전 최종 점검 리스트',T+' 하루 만에 확인하는 점검표'],
+  outline:['한 장 요약: 점검 방법','영역 1: 준비 단계 점검 5항목','영역 2: 실행 단계 점검 5항목','영역 3: 확인 단계 점검 5항목','항목별 이유 한 줄','점수에 따른 다음 행동'],
+  land:{h:T+', 빠뜨린 게 없는지 한 장으로 확인하세요',sub:'바로 인쇄해서 쓸 수 있는 점검표입니다.',btn:'체크리스트 받기',proof:'5분이면 끝까지 확인할 수 있습니다.'},
+  bridge:'체크하지 못한 항목이 3개 이상이면 연결할 해결 상품이나 상담을 마지막 쪽에 안내하세요.',
+  mails:['즉시 발송: 체크리스트 PDF와 사용법 한 줄','2일 뒤: 가장 많이 놓치는 항목 1개 해설','5일 뒤: 점검 결과를 같이 보는 상담 안내']},
+ guide:{
+  titles:[T+' 실행 가이드: 7단계로 끝내기',T+' 따라 하기만 하면 되는 순서',T+' 처음 하는 사람을 위한 단계별 안내',T+' 하루 30분씩 7일 실행표',T+' 막힐 때 확인하는 해결 가이드'],
+  outline:['시작 전 준비물과 목표','1~2단계: 현재 상태 파악','3~5단계: 핵심 실행','6단계: 결과 확인과 수정','자주 막히는 지점 5가지','다음 단계와 도움받는 방법'],
+  land:{h:T+', 따라 하기만 하면 됩니다',sub:'처음 하는 사람도 순서대로 해낼 수 있도록 단계별로 정리했습니다.',btn:'실행 가이드 받기',proof:'각 단계에 예시 화면과 소요 시간을 넣었습니다.'},
+  bridge:'가이드 마지막에 ‘혼자 하기 어려운 단계는 같이 진행해 드립니다’ 제안을 넣으세요. 직접 해 본 사람이 가장 정확하게 도움을 요청합니다.',
+  mails:['즉시 발송: 가이드 링크와 1단계 바로 시작하기','2일 뒤: 많이 막히는 단계의 보충 설명','5일 뒤: 진행 상황 확인과 도움 제안']},
+ tmpl:{
+  titles:[T+' 바로 쓰는 템플릿',T+' 복사해서 쓰는 양식 세트',T+' 채우기만 하면 되는 계산표',T+' 작성 예시가 들어 있는 양식',T+' 업무 시간을 줄여 주는 템플릿'],
+  outline:['사용법 한 쪽','양식 본문(복사해서 사용)','작성 예시 1개','자주 하는 실수와 보정 방법','응용 버전 안내','다음 단계 안내'],
+  land:{h:T+', 만들 필요 없이 채우기만 하세요',sub:'바로 복사해서 쓸 수 있는 양식과 작성 예시를 드립니다.',btn:'템플릿 받기',proof:'복사 한 번으로 바로 사용할 수 있습니다.'},
+  bridge:'양식을 쓰는 중 막히는 지점을 상정해, ‘이 칸을 대신 채워 드립니다’ 형태의 유료 상품이나 상담을 안내하세요.',
+  mails:['즉시 발송: 템플릿 링크와 30초 사용법','2일 뒤: 작성 예시와 흔한 실수','5일 뒤: 양식을 대신 채워 주는 서비스 안내']},
+ case:{
+  titles:[T+' 실제 사례: 문제에서 결과까지',T+' 3곳이 바꾼 방법과 결과',T+' 전후 비교로 보는 사례집',T+' 이렇게 해결했습니다',T+' 성공 사례 분석 리포트'],
+  outline:['사례 한 장 요약: 누가, 무엇이, 어떻게','문제 상황','시도한 방법과 과정','결과(숫자와 전후 비교)','배운 점과 적용 포인트','내 상황에 맞추는 방법'],
+  land:{h:T+', 실제로 이렇게 바뀌었습니다',sub:'숫자와 과정이 보이는 사례를 PDF로 정리했습니다.',btn:'사례집 받기',proof:'고객 공개 동의를 받은 사례만 담았습니다.'},
+  bridge:'마지막 장에 ‘내 상황이라면’ 간단 진단 신청을 넣으세요. 비슷한 사례의 주인공이 되고 싶은 사람이 연락합니다.',
+  mails:['즉시 발송: 사례집 링크와 가장 비슷한 사례 안내','2일 뒤: 다른 사례 1개와 핵심 차이','5일 뒤: 내 상황에 맞춰 보는 상담 제안']}
+ };
+ return C[k];
+}
+
+/* ───────── 폼 ───────── */
+var form=document.getElementById('form');
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+(function renderForm(){
+ var h='<div class="q"><label class="legend-like" for="topic" style="font-weight:700">리드마그넷의 주제는 무엇인가요?<span class="hint">고객이 얻고 싶은 결과를 한 문장으로</span></label><input type="text" id="topic" maxlength="60" value="'+esc(SAMPLE.topic)+'" placeholder="예: 스마트스토어 리뷰 늘리기"></div>';
+ Q.forEach(function(q){
+  h+='<fieldset class="q"><legend>'+q.label+(q.hint?'<span class="hint">'+q.hint+'</span>':'')+'</legend><div class="chips">';
+  q.opts.forEach(function(o){
+   var checked=q.type==='multi'?SAMPLE[q.key].indexOf(o.v)>-1:SAMPLE[q.key]===o.v;
+   h+='<label class="chip"><input type="'+(q.type==='multi'?'checkbox':'radio')+'" name="'+q.key+'" value="'+o.v+'"'+(checked?' checked':'')+'><span>'+o.l+'</span></label>';
+  });
+  h+='</div></fieldset>';
+ });
+ h+='<div class="row"><button class="btn" type="submit" id="go">추천 받기</button><span class="err" id="ferr" role="alert"></span></div>';
+ form.innerHTML=h;
+})();
+
+/* ───────── 점수 ───────── */
+function maxFor(k){
+ var m=0;
+ Q.forEach(function(q){
+  if(q.type==='multi'){q.opts.forEach(function(o){if(o.w[k]>0)m+=o.w[k]})}
+  else{var b=0;q.opts.forEach(function(o){if((o.w[k]||0)>b)b=o.w[k]});m+=b}
+ });
+ return m;
+}
+function readAnswers(){
+ var a={topic:document.getElementById('topic').value.trim()};
+ Q.forEach(function(q){
+  var els=form.querySelectorAll('input[name="'+q.key+'"]:checked');
+  a[q.key]=q.type==='multi'?Array.prototype.map.call(els,function(e){return e.value}):(els[0]?els[0].value:null);
+ });
+ return a;
+}
+function score(a){
+ var S={},contrib={};
+ TYPES.forEach(function(t){S[t.k]=0;contrib[t.k]={}});
+ Q.forEach(function(q){
+  var picked=q.type==='multi'?a[q.key]:[a[q.key]];
+  picked.forEach(function(v){
+   var o=q.opts.filter(function(x){return x.v===v})[0];if(!o)return;
+   TYPES.forEach(function(t){var w=o.w[t.k]||0;S[t.k]+=w;contrib[t.k][q.key]=(contrib[t.k][q.key]||0)+w});
+  });
+ });
+ if(a.assets.indexOf('reviews')<0){S.case-=3;contrib.case.assets=(contrib.case.assets||0)-3}
+ return {S:S,contrib:contrib};
+}
+function rank(a){
+ var r=score(a);
+ var list=TYPES.map(function(t,i){
+  var fit=Math.max(0,Math.min(96,Math.round(100*r.S[t.k]/maxFor(t.k))));
+  return {t:t,s:r.S[t.k],fit:fit,i:i};
+ });
+ list.sort(function(x,y){return y.fit-x.fit||y.s-x.s||x.i-y.i});
+ return {list:list,contrib:r.contrib};
+}
+
+/* ───────── 결과 ───────── */
+var LAST=null;
+function labelsOf(q,a){
+ var picked=q.type==='multi'?a[q.key]:[a[q.key]];
+ return picked.map(function(v){var o=q.opts.filter(function(x){return x.v===v})[0];return o?o.l:''}).filter(Boolean).join(', ');
+}
+function showResult(a){
+ var R=rank(a),top=R.list[0],second=R.list[1];
+ LAST={a:a,R:R};
+ var reasons=Q.map(function(q){return {q:q,c:R.contrib[top.t.k][q.key]||0}}).filter(function(x){return x.c>0}).sort(function(x,y){return y.c-x.c}).slice(0,3);
+ var gap=top.fit-second.fit;
+ var bars=R.list.map(function(r,idx){
+  return '<div class="bar'+(idx===0?' top':'')+'" style="--tc:var('+r.t.c+')"><span class="nm">'+r.t.short+'</span><div class="track"><div class="fill" style="width:'+r.fit+'%"></div></div><span class="v">'+r.fit+'%</span></div>';
+ }).join('');
+ var C=build(top.t.k,a.topic,a);
+ var h='';
+ h+='<section class="card pick" style="--tc:var('+top.t.c+')"><div class="tag"><span class="dot"></span>1순위 추천</div>'
+  +'<div class="name">'+top.t.name+'</div>'
+  +'<div class="fit"><b>'+top.fit+'%</b><span>내 답변과의 적합도</span></div>'
+  +'<p class="lead" style="max-width:none">주제 ‘'+esc(a.topic)+'’에는 <b>'+top.t.short+'</b> 형태가 가장 잘 맞습니다.'+(gap<=6?' 2순위 '+second.t.short+'와 점수 차이가 작으니 아래 조합 제안도 확인해 보세요.':'')+'</p>'
+  +'<ul class="reasons">'+reasons.map(function(x){
+     var why=WHY[top.t.k][x.q.key]||(x.q.key==='capacity'?'지금 쓸 수 있는 시간 안에 만들 수 있는 범위입니다.':'이 판매 형태에서 전환에 기여하는 유형입니다.');
+     return '<li><b>'+x.q.short+'</b> ‘'+esc(labelsOf(x.q,a))+'’<small>'+why+'</small></li>';
+   }).join('')+'</ul>'
+  +'<div class="warnbox"><b>주의</b> '+CAUTION[top.t.k]+'</div></section>';
+ h+='<section class="card"><h2 style="margin-bottom:14px">6가지 유형 적합도</h2><div class="bars">'+bars+'</div></section>';
+ h+='<section class="card"><h2 style="margin-bottom:12px">요약</h2><div class="summary-grid">'
+  +'<div class="kv"><small>추천 제목 1안</small><div>'+C.titles[0]+'</div></div>'
+  +'<div class="kv"><small>제작 사양</small><div>'+top.t.fmt+'</div></div>'
+  +'<div class="kv"><small>제작 기간 · 난이도</small><div>'+top.t.days+' · '+top.t.diff+'</div></div>'
+  +'</div></section>';
+ var secs=['제목 후보 5개','구성안(목차)','랜딩 페이지 카피','유료 상품으로 이어지는 연결','후속 이메일 3통','측정 지표와 개선 순서','2순위 유형 활용법'];
+ h+='<section class="gate-wrap" id="gateWrap"><div class="card locked" aria-hidden="true">'+secs.map(function(s){return '<div><div class="preview-title">'+s+'</div><div class="sk"><i></i><i></i><i></i></div></div>'}).join('')+'</div>'
+  +'<div class="card gate" id="gate"><h2>전체 리포트 열기</h2><p class="lead" style="margin:6px 0 12px">제목 후보, 구성안, 랜딩 카피, 후속 이메일 3통, 측정 지표를 이메일로 확인하세요.</p>'
+  +'<form id="gform" novalidate><input type="email" id="gemail" placeholder="이메일 주소" autocomplete="email" aria-label="이메일 주소">'
+  +'<label class="consent"><input type="checkbox" id="gconsent"><span>(필수) 리포트 발송과 관련 안내 수신을 위한 이메일 수집·이용에 동의합니다.</span></label>'
+  +'<div class="row"><button class="btn" type="submit">리포트 열기</button><span class="err" id="gerr" role="alert"></span></div>'
+  +'<p class="fine">프로토타입 화면입니다. 입력한 이메일은 서버로 전송되지 않습니다.</p></form></div></section>';
+ h+='<div id="report" hidden></div>';
+ h+='<div class="row"><button class="btn ghost" id="again" type="button">답변 수정하고 다시 추천받기</button></div>';
+ var el=document.getElementById('result');
+ el.innerHTML=h;el.hidden=false;
+ document.getElementById('gform').addEventListener('submit',unlock);
+ document.getElementById('again').addEventListener('click',function(){el.hidden=true;document.getElementById('formCard').scrollIntoView({behavior:'smooth'})});
+}
+
+function unlock(e){
+ e.preventDefault();
+ var em=document.getElementById('gemail').value.trim(),ok=document.getElementById('gconsent').checked,err=document.getElementById('gerr');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){err.textContent='이메일 형식을 확인해 주세요.';return}
+ if(!ok){err.textContent='수집·이용 동의에 체크해 주세요.';return}
+ renderReport();
+ document.getElementById('gateWrap').hidden=true;
+ var rp=document.getElementById('report');rp.hidden=false;rp.scrollIntoView({behavior:'smooth'});
+}
+
+function renderReport(){
+ var a=LAST.a,R=LAST.R,top=R.list[0],second=R.list[1],C=build(top.t.k,a.topic,a),C2=build(second.t.k,a.topic,a);
+ var li=function(arr,tag){return '<'+tag+'>'+arr.map(function(x){return '<li>'+x+'</li>'}).join('')+'</'+tag+'>'};
+ var kpi=[
+  '<b>랜딩 전환율</b> = 이메일 입력 수 ÷ 방문 수. 처음 2주는 이 숫자만 보세요.',
+  '<b>자료 열람률</b> = 첫 메일을 연 사람 ÷ 가입자. 낮으면 제목 후보를 바꿔 테스트합니다.',
+  '<b>다음 행동 전환율</b> = 상담·구매 클릭 ÷ 가입자. 연결 문구를 고칠 때 보는 숫자입니다.',
+  '개선 순서는 제목 → 랜딩 헤드라인 → 연결 문구 순으로, 한 번에 하나만 바꿉니다.'
+ ];
+ var plain=[];
+ var h='<section class="card report">'
+ +'<div class="sec"><h3><span class="idx">1</span>추천 포맷과 제작 사양</h3><div class="summary-grid"><div class="kv"><small>유형</small><div>'+top.t.name+'</div></div><div class="kv"><small>사양</small><div>'+top.t.fmt+'</div></div><div class="kv"><small>제작 기간 · 난이도</small><div>'+top.t.days+' · '+top.t.diff+'</div></div></div></div>'
+ +'<div class="sec"><h3><span class="idx">2</span>제목 후보 5개</h3>'+li(C.titles,'ol')+'</div>'
+ +'<div class="sec"><h3><span class="idx">3</span>구성안(목차)</h3>'+li(C.outline,'ol')+'</div>'
+ +'<div class="sec"><h3><span class="idx">4</span>랜딩 페이지 카피</h3><div class="copyline"><b>헤드라인</b>'+C.land.h+'</div><div class="copyline"><b>서브 문구</b>'+C.land.sub+'</div><div class="copyline"><b>버튼</b>'+C.land.btn+'</div><div class="copyline"><b>신뢰 문구</b>'+C.land.proof+'</div></div>'
+ +'<div class="sec"><h3><span class="idx">5</span>유료 상품으로 이어지는 연결</h3><p>'+C.bridge+'</p></div>'
+ +'<div class="sec"><h3><span class="idx">6</span>후속 이메일 3통</h3>'+C.mails.map(function(m){var p=m.split(': ');return '<div class="mail"><span class="when">'+p[0]+'</span><span>'+p.slice(1).join(': ')+'</span></div>'}).join('')+'</div>'
+ +'<div class="sec"><h3><span class="idx">7</span>측정 지표와 개선 순서</h3>'+li(kpi,'ul')+'</div>'
+ +'<div class="sec" style="--tc:var('+second.t.c+')"><h3><span class="idx">8</span>2순위 유형 활용법</h3><div class="alt"><div class="kv"><small>2순위</small><div>'+second.t.name+' · 적합도 '+second.fit+'%</div></div><div class="kv"><small>조합 제안</small><div>1순위 자료를 받은 사람에게 둘째 메일에서 ‘'+C2.titles[0]+'’를 이어서 안내하세요.</div></div></div></div>'
+ +'<div class="sec"><div class="cta"><b>이 리드마그넷, 대신 만들어 드립니다</b><span>추천된 '+top.t.short+'를 내 사업에 맞게 제작하고 랜딩 페이지와 후속 메일까지 연결해 드립니다.</span>'
+ +(KAKAO_URL?'<a class="btn" href="'+KAKAO_URL+'" target="_blank" rel="noopener">카카오 채널로 상담하기</a>':'<button class="btn" type="button" disabled>카카오 채널로 상담하기</button><span class="fine">운영자 설정 필요: 카카오 채널 주소가 아직 입력되지 않았습니다.</span>')
+ +'</div><p class="fine">실서비스에서는 입력한 이메일로 이 리포트와 후속 안내 3통이 자동 발송됩니다. 프로토타입에서는 발송되지 않습니다.</p></div>'
+ +'<div class="row"><button class="btn" id="copyAll" type="button">리포트 텍스트 복사</button><span class="fine" id="cpmsg" role="status"></span></div>'
+ +'</section>';
+ document.getElementById('report').innerHTML=h;
+ document.getElementById('copyAll').addEventListener('click',function(){
+  var txt=['[추천] '+top.t.name+' (적합도 '+top.fit+'%)','주제: '+a.topic,'','[제목 후보]'].concat(C.titles.map(function(x,i){return (i+1)+'. '+x}),['','[구성안]'],C.outline.map(function(x,i){return (i+1)+'. '+x}),['','[랜딩 카피]','헤드라인: '+C.land.h,'서브: '+C.land.sub,'버튼: '+C.land.btn,'신뢰: '+C.land.proof,'','[연결]',C.bridge,'','[후속 이메일]'],C.mails).join('\n');
+  var m=document.getElementById('cpmsg');
+  try{navigator.clipboard.writeText(txt).then(function(){m.textContent='복사했습니다.'},function(){m.textContent='복사가 막혀 있습니다. 화면에서 직접 선택해 복사해 주세요.'})}
+  catch(err){m.textContent='복사가 막혀 있습니다. 화면에서 직접 선택해 복사해 주세요.'}
+ });
+}
+
+/* ───────── 제출 ───────── */
+form.addEventListener('submit',function(e){
+ e.preventDefault();
+ var a=readAnswers(),er=document.getElementById('ferr');
+ if(a.topic.length<2){er.textContent='주제를 한 문장으로 적어 주세요.';return}
+ var miss=Q.filter(function(q){return q.type==='single'&&!a[q.key]});
+ if(miss.length){er.textContent='‘'+miss[0].label+'’ 질문에 답해 주세요.';return}
+ er.textContent='';
+ document.getElementById('result').hidden=true;
+ var an=document.getElementById('analyzing');an.hidden=false;
+ an.scrollIntoView({behavior:'smooth',block:'center'});
+ setTimeout(function(){an.hidden=true;showResult(a);document.getElementById('result').scrollIntoView({behavior:'smooth'})},900);
+});
+</script>
+
+</body>
+</html>
