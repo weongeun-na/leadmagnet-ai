@@ -3,9 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex">
 <meta name="description" content="주제와 7가지 질문으로 나에게 맞는 리드마그넷 유형과 제목·구성안·랜딩 카피를 추천받는 무료 진단 도구">
-<title>리드마그넷 추천기</title>
+<title>리드마그넷 AI 추천기</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://leadmagnet-ai.changer.so">
+<meta property="og:title" content="리드마그넷 AI 추천기 · 무료 진단">
+<meta property="og:description" content="주제와 7가지 질문으로 나에게 맞는 리드마그넷 유형과 제목·구성안·랜딩 카피를 무료로 추천받으세요.">
+<meta name="theme-color" content="#2A56B8">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <style>
@@ -108,6 +112,19 @@ input[type=text]:focus-visible,input[type=email]:focus-visible{outline:2px solid
 a.btn{display:inline-block;text-decoration:none;text-align:center}
 .cta{background:var(--accent-soft);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
 .cta b{font-size:16px}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.pkgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:100%}
+.pkg{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.pkg.best{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.pkg .pn{font-weight:700}
+.pkg .pp{font-family:var(--font-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.pkg .pp small{font-family:var(--font-body);font-size:11px;color:var(--muted);margin-left:4px}
+.pkg ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.pkg .badge{align-self:flex-start;font-family:var(--font-mono);font-size:11px;padding:2px 7px;border-radius:5px;background:var(--accent-soft);color:var(--accent)}
+details.priv{font-size:12px;color:var(--muted)}
+details.priv summary{cursor:pointer;color:var(--accent)}
+details.priv div{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+footer.site{font-size:12px;color:var(--muted);text-align:center;display:flex;flex-direction:column;gap:4px}
 [hidden]{display:none!important}
 @media (max-width:520px){.bar{grid-template-columns:78px 1fr 40px}.card{padding:16px}}
 html{-webkit-text-size-adjust:100%}body{margin:0}
@@ -118,7 +135,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">Lead Magnet Finder · 무료 진단</div>
+    <div class="eyebrow">Lead Magnet AI · 무료 진단</div>
     <h1>우리 비즈니스에 맞는 리드마그넷, 1분이면 정해집니다</h1>
     <p class="lead">주제와 일곱 가지 질문에 답하면 전자책·자가진단·체크리스트·실행 가이드·템플릿·사례 연구 중 가장 잘 맞는 유형과 제목, 구성안, 랜딩 카피를 만들어 드립니다.</p>
   </header>
@@ -126,16 +143,17 @@ html{-webkit-text-size-adjust:100%}body{margin:0}
   <section class="card" id="formCard" aria-labelledby="fh">
     <h2 id="fh" class="eyebrow" style="font-weight:500">질문 입력</h2>
     <p class="sample-note" style="margin:8px 0 18px"><b>예시</b> 아래 답변은 예시 값입니다. 내 상황에 맞게 바꿔 주세요.</p>
-    <form id="form" novalidate></form>
+    <form id="form" novalidate onsubmit="return false"></form>
   </section>
 
-  <section id="analyzing" class="card" hidden aria-live="polite">
+  <section id="analyzing" class="card" hidden style="display:none!important" aria-live="polite">
     <div class="dots"><i></i><i></i><i></i></div>
     <div>답변을 6개 유형에 대조해 점수를 매기고 있습니다</div>
   </section>
 
-  <div id="result" hidden class="wrap" style="gap:20px"></div>
+  <div id="result" hidden style="display:none!important"></div>
 </div>
+<footer class="site" id="sitefoot"></footer>
 
 <script>
 /* ───────── 데이터 ───────── */
@@ -181,8 +199,20 @@ var Q=[
   {v:'3d',l:'3일 정도',w:{quiz:1,guide:1,tmpl:1}},
   {v:'1w',l:'일주일 이상',w:{ebook:2,quiz:1,guide:1,case:1}}]}
 ];
-/* 운영자 설정: 카카오 채널 상담 주소(예: https://pf.kakao.com/_xxxxx). 비워 두면 버튼이 비활성으로 표시됩니다. */
-var KAKAO_URL='';
+/* ───────── 운영자 설정 ───────── */
+/* 카카오 채널 상담 주소. 비워 두면 버튼이 비활성으로 표시됩니다. */
+var KAKAO_URL='https://pf.kakao.com/_bFxcFX/chat';
+/* 이메일 수집 주소: Google Apps Script 웹 앱 배포 URL(…/exec). 비워 두면 전송하지 않습니다. */
+var ENDPOINT='';
+/* 구글 폼 수집: 폼에 응답이 쌓이고 연결된 시트에 한 줄씩 기록됩니다. */
+var FORM={
+ url:'https://docs.google.com/forms/d/e/1FAIpQLSfPjg9s1Fa-sf0llQyiMZvjaMeblAVMPSCaoBGl6_CNIbc51Q/formResponse',
+ f:{email:'entry.878588706',topic:'entry.1144092502',type:'entry.956073794',fit:'entry.848529919',mkt:'entry.395808719',answers:'entry.1733829036',report:'entry.1738623313'}
+};
+/* Google Analytics 측정 ID(예: G-XXXXXXXXXX). 비워 두면 측정하지 않습니다. */
+var GA_ID='';
+/* 개인정보 처리 안내에 표시되는 운영자 정보 */
+var OP={name:'마케팅 자동화 시스템',contact:'카카오 채널 “리드마그넷 AI” · 010-3642-6957'};
 var SAMPLE={topic:'쇼핑몰 상세페이지 전환율 높이기',offer:'service',stage:'problem',pain:'howto',goal:'consult',price:'mid',assets:['expertise','data'],capacity:'3d'};
 
 var WHY={
@@ -247,6 +277,19 @@ function build(k,t,ctx){
 }
 
 /* ───────── 폼 ───────── */
+/* 호스팅 서비스의 기본 스타일이 hidden 속성을 무시할 수 있어 인라인 !important 로 직접 제어한다. */
+function setHidden(el,b){el.hidden=!!b;if(b)el.style.setProperty('display','none','important');else el.style.removeProperty('display')}
+/* 결과는 화면 전체를 덮는 창으로 띄운다. 호스팅 서비스가 본문 높이를 고정해도 잘리지 않는다. */
+function openOverlay(el){
+ el.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483000;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg);color:var(--ink);padding:24px max(16px,calc((100vw - 860px)/2)) 64px;display:flex;flex-direction:column;gap:20px;box-sizing:border-box';
+ el.hidden=false;el.scrollTop=0;
+ try{document.body.style.overflow='hidden'}catch(e){}
+}
+function closeOverlay(el){
+ setHidden(el,true);
+ try{document.body.style.overflow=''}catch(e){}
+ try{document.getElementById('formCard').scrollIntoView({behavior:'smooth'})}catch(e){}
+}
 var form=document.getElementById('form');
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 (function renderForm(){
@@ -255,7 +298,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&am
   h+='<fieldset class="q"><legend>'+q.label+(q.hint?'<span class="hint">'+q.hint+'</span>':'')+'</legend><div class="chips">';
   q.opts.forEach(function(o){
    var checked=q.type==='multi'?SAMPLE[q.key].indexOf(o.v)>-1:SAMPLE[q.key]===o.v;
-   h+='<label class="chip"><input type="'+(q.type==='multi'?'checkbox':'radio')+'" name="'+q.key+'" value="'+o.v+'"'+(checked?' checked':'')+'><span>'+o.l+'</span></label>';
+   h+='<label class="chip"><input type="'+(q.type==='multi'?'checkbox':'radio')+'" name="'+q.key+'" value="'+o.v+'"'+(checked?' checked':'')+' style="position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important;opacity:0!important;appearance:none!important;-webkit-appearance:none!important;cursor:pointer"><span>'+o.l+'</span></label>';
   });
   h+='</div></fieldset>';
  });
@@ -337,26 +380,56 @@ function showResult(a){
  var secs=['제목 후보 5개','구성안(목차)','랜딩 페이지 카피','유료 상품으로 이어지는 연결','후속 이메일 3통','측정 지표와 개선 순서','2순위 유형 활용법'];
  h+='<section class="gate-wrap" id="gateWrap"><div class="card locked" aria-hidden="true">'+secs.map(function(s){return '<div><div class="preview-title">'+s+'</div><div class="sk"><i></i><i></i><i></i></div></div>'}).join('')+'</div>'
   +'<div class="card gate" id="gate"><h2>전체 리포트 열기</h2><p class="lead" style="margin:6px 0 12px">제목 후보, 구성안, 랜딩 카피, 후속 이메일 3통, 측정 지표를 이메일로 확인하세요.</p>'
-  +'<form id="gform" novalidate><input type="email" id="gemail" placeholder="이메일 주소" autocomplete="email" aria-label="이메일 주소">'
-  +'<label class="consent"><input type="checkbox" id="gconsent"><span>(필수) 리포트 발송과 관련 안내 수신을 위한 이메일 수집·이용에 동의합니다.</span></label>'
-  +'<div class="row"><button class="btn" type="submit">리포트 열기</button><span class="err" id="gerr" role="alert"></span></div>'
-  +'<p class="fine">프로토타입 화면입니다. 입력한 이메일은 서버로 전송되지 않습니다.</p></form></div></section>';
- h+='<div id="report" hidden></div>';
+  +'<form id="gform" novalidate onsubmit="return false"><input type="email" id="gemail" placeholder="이메일 주소" autocomplete="email" aria-label="이메일 주소">'
+  +'<input class="hp" type="text" id="gweb" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;opacity:0!important">'
+  +'<label class="consent"><input type="checkbox" id="gconsent" style="width:16px!important;height:16px!important;flex:none"><span>(필수) 개인정보 수집·이용에 동의합니다. 이메일 주소를 리포트 제공과 안내 목적으로 수집하며, 동의 철회나 삭제 요청 시까지 보관합니다.</span></label>'
+  +'<label class="consent"><input type="checkbox" id="gmkt" style="width:16px!important;height:16px!important;flex:none"><span>(선택) 리드마그넷 제작 팁과 서비스 안내 메일(광고성 정보) 수신에 동의합니다. 2~3회 발송되며 언제든 수신거부할 수 있습니다.</span></label>'
+  +'<div class="row"><button class="btn" type="submit" id="gbtn">리포트 열기</button><span class="err" id="gerr" role="alert"></span></div>'
+  +'<details class="priv"><summary>개인정보 처리 안내 보기</summary><div><span>수집 항목: 이메일 주소, 입력하신 주제와 답변</span><span>이용 목적: 리포트 제공, (선택 동의 시) 후속 안내 메일 발송</span><span>보관 기간: 동의 철회 또는 삭제 요청 시까지</span><span>동의를 거부할 수 있으나, 필수 항목에 동의하지 않으면 전체 리포트를 열 수 없습니다.</span><span id="privop"></span></div></details>'
+  +'<p class="fine" id="gnote"></p></form></div></section>';
+ h+='<div id="report" hidden style="display:none!important"></div>';
  h+='<div class="row"><button class="btn ghost" id="again" type="button">답변 수정하고 다시 추천받기</button></div>';
- var el=document.getElementById('result');
- el.innerHTML=h;el.hidden=false;
+ var el=getResultBox();
+ el.innerHTML='<div class="row"><button class="btn ghost" id="closeTop" type="button">← 답변 수정하기</button></div>'+h;
+ openOverlay(el);
  document.getElementById('gform').addEventListener('submit',unlock);
- document.getElementById('again').addEventListener('click',function(){el.hidden=true;document.getElementById('formCard').scrollIntoView({behavior:'smooth'})});
+ document.getElementById('gnote').textContent=ENDPOINT?'입력하신 이메일로 리포트 사본이 발송됩니다.':'';
+ document.getElementById('privop').textContent=OP.name?('운영자: '+OP.name+(OP.contact?' · 문의: '+OP.contact:'')):'';
+ track('view_result',{lead_type:top.t.k});
+ document.getElementById('again').addEventListener('click',function(){closeOverlay(el)});
+ document.getElementById('closeTop').addEventListener('click',function(){closeOverlay(el)});
 }
 
+function track(n,p){try{if(window.gtag)window.gtag('event',n,p||{})}catch(e){}}
 function unlock(e){
  e.preventDefault();
- var em=document.getElementById('gemail').value.trim(),ok=document.getElementById('gconsent').checked,err=document.getElementById('gerr');
+ var em=document.getElementById('gemail').value.trim(),ok=document.getElementById('gconsent').checked,err=document.getElementById('gerr'),btn=document.getElementById('gbtn');
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){err.textContent='이메일 형식을 확인해 주세요.';return}
- if(!ok){err.textContent='수집·이용 동의에 체크해 주세요.';return}
+ if(!ok){err.textContent='필수 항목(개인정보 수집·이용)에 동의해 주세요.';return}
+ err.textContent='';btn.disabled=true;
  renderReport();
- document.getElementById('gateWrap').hidden=true;
- var rp=document.getElementById('report');rp.hidden=false;rp.scrollIntoView({behavior:'smooth'});
+ if(!document.getElementById('gweb').value) sendLead(em,document.getElementById('gmkt').checked);
+ track('generate_lead',{lead_type:LAST.R.list[0].t.k});
+ setHidden(document.getElementById('gateWrap'),true);
+ var rp=document.getElementById('report');setHidden(rp,false);rp.scrollIntoView({behavior:'smooth'});
+}
+function sendLead(em,mkt){
+ var top=LAST.R.list[0],a=LAST.a;
+ var ans={};Q.forEach(function(q){ans[q.short]=labelsOf(q,a)});
+ if(FORM&&FORM.url){
+  var p=new URLSearchParams();
+  p.append(FORM.f.email,em);p.append(FORM.f.topic,a.topic);p.append(FORM.f.type,top.t.name);p.append(FORM.f.fit,String(top.fit));
+  p.append(FORM.f.mkt,mkt?'동의':'미동의');p.append(FORM.f.answers,Object.keys(ans).map(function(k){return k+': '+ans[k]}).join(' / '));p.append(FORM.f.report,reportText());
+  try{fetch(FORM.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:p.toString()}).catch(function(){})}catch(x){}
+  return;
+ }
+ if(!ENDPOINT)return;
+ var body=JSON.stringify({email:em,topic:a.topic,type:top.t.name,fit:top.fit,answers:ans,marketing:!!mkt,report:reportText(),page:location.href});
+ try{fetch(ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body}).catch(function(){})}catch(x){}
+}
+function reportText(){
+ var a=LAST.a,R=LAST.R,top=R.list[0],C=build(top.t.k,a.topic,a);
+ return ['[추천] '+top.t.name+' (적합도 '+top.fit+'%)','주제: '+a.topic,'','[제목 후보]'].concat(C.titles.map(function(x,i){return (i+1)+'. '+x}),['','[구성안]'],C.outline.map(function(x,i){return (i+1)+'. '+x}),['','[랜딩 카피]','헤드라인: '+C.land.h,'서브: '+C.land.sub,'버튼: '+C.land.btn,'신뢰: '+C.land.proof,'','[연결]',C.bridge,'','[후속 이메일]'],C.mails).join('\n');
 }
 
 function renderReport(){
@@ -379,13 +452,18 @@ function renderReport(){
  +'<div class="sec"><h3><span class="idx">7</span>측정 지표와 개선 순서</h3>'+li(kpi,'ul')+'</div>'
  +'<div class="sec" style="--tc:var('+second.t.c+')"><h3><span class="idx">8</span>2순위 유형 활용법</h3><div class="alt"><div class="kv"><small>2순위</small><div>'+second.t.name+' · 적합도 '+second.fit+'%</div></div><div class="kv"><small>조합 제안</small><div>1순위 자료를 받은 사람에게 둘째 메일에서 ‘'+C2.titles[0]+'’를 이어서 안내하세요.</div></div></div></div>'
  +'<div class="sec"><div class="cta"><b>이 리드마그넷, 대신 만들어 드립니다</b><span>추천된 '+top.t.short+'를 내 사업에 맞게 제작하고 랜딩 페이지와 후속 메일까지 연결해 드립니다.</span>'
- +(KAKAO_URL?'<a class="btn" href="'+KAKAO_URL+'" target="_blank" rel="noopener">카카오 채널로 상담하기</a>':'<button class="btn" type="button" disabled>카카오 채널로 상담하기</button><span class="fine">운영자 설정 필요: 카카오 채널 주소가 아직 입력되지 않았습니다.</span>')
- +'</div><p class="fine">실서비스에서는 입력한 이메일로 이 리포트와 후속 안내 3통이 자동 발송됩니다. 프로토타입에서는 발송되지 않습니다.</p></div>'
+ +'<div class="pkgs">'
+ +'<div class="pkg"><span class="pn">베이직</span><span class="pp">29만 원<small> (부가세 별도)</small></span><ul><li>리드마그넷 본문 1종</li><li>제목 · 구성안 · 카피</li></ul></div>'
+ +'<div class="pkg best"><span class="badge">가장 많이 선택</span><span class="pn">스탠다드</span><span class="pp">79만 원<small> (부가세 별도)</small></span><ul><li>베이직 전체</li><li>랜딩 페이지</li><li>후속 이메일 3통</li><li>자동 발송 세팅</li></ul></div>'
+ +'<div class="pkg"><span class="pn">프리미엄</span><span class="pp">149만 원<small> (부가세 별도)</small></span><ul><li>본문 2종</li><li>분석 코드 포함 랜딩</li><li>후속 이메일 5통</li><li>1개월 개선 + 상담 1회</li></ul></div></div>'
+ +(KAKAO_URL?'<a class="btn kakao" href="'+KAKAO_URL+'" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">카카오 채널로 상담하기</a>':'<button class="btn" type="button" disabled>카카오 채널로 상담하기</button><span class="fine">운영자 설정 필요: 카카오 채널 주소가 아직 입력되지 않았습니다.</span>')
+ +'</div><p class="fine">상담은 카카오 채널 채팅으로 이어집니다. 채팅 답변은 평일 09:00~18:00에 드리며, 그 외 시간에 남기신 메시지는 다음 영업일에 답변드립니다. 제작 범위와 최종 금액은 상담에서 확정됩니다.</p></div>'
  +'<div class="row"><button class="btn" id="copyAll" type="button">리포트 텍스트 복사</button><span class="fine" id="cpmsg" role="status"></span></div>'
  +'</section>';
  document.getElementById('report').innerHTML=h;
+ var kk=document.querySelector('#report a.kakao');if(kk)kk.addEventListener('click',function(){track('kakao_click')});
  document.getElementById('copyAll').addEventListener('click',function(){
-  var txt=['[추천] '+top.t.name+' (적합도 '+top.fit+'%)','주제: '+a.topic,'','[제목 후보]'].concat(C.titles.map(function(x,i){return (i+1)+'. '+x}),['','[구성안]'],C.outline.map(function(x,i){return (i+1)+'. '+x}),['','[랜딩 카피]','헤드라인: '+C.land.h,'서브: '+C.land.sub,'버튼: '+C.land.btn,'신뢰: '+C.land.proof,'','[연결]',C.bridge,'','[후속 이메일]'],C.mails).join('\n');
+  var txt=reportText();
   var m=document.getElementById('cpmsg');
   try{navigator.clipboard.writeText(txt).then(function(){m.textContent='복사했습니다.'},function(){m.textContent='복사가 막혀 있습니다. 화면에서 직접 선택해 복사해 주세요.'})}
   catch(err){m.textContent='복사가 막혀 있습니다. 화면에서 직접 선택해 복사해 주세요.'}
@@ -393,18 +471,66 @@ function renderReport(){
 }
 
 /* ───────── 제출 ───────── */
-form.addEventListener('submit',function(e){
- e.preventDefault();
- var a=readAnswers(),er=document.getElementById('ferr');
- if(a.topic.length<2){er.textContent='주제를 한 문장으로 적어 주세요.';return}
- var miss=Q.filter(function(q){return q.type==='single'&&!a[q.key]});
- if(miss.length){er.textContent='‘'+miss[0].label+'’ 질문에 답해 주세요.';return}
- er.textContent='';
- document.getElementById('result').hidden=true;
- var an=document.getElementById('analyzing');an.hidden=false;
- an.scrollIntoView({behavior:'smooth',block:'center'});
- setTimeout(function(){an.hidden=true;showResult(a);document.getElementById('result').scrollIntoView({behavior:'smooth'})},900);
-});
+/* 호스팅 서비스가 빈 요소를 지울 수 있어, 결과 창이 없으면 직접 만든다. */
+function getResultBox(){
+ var el=document.getElementById('result');
+ if(!el){el=document.createElement('div');el.id='result';el.hidden=true;document.body.appendChild(el)}
+ return el;
+}
+/* 분석 중 화면: 문구가 2초 간격으로 바뀌며 약 8초 동안 전체 화면으로 보여 준다. */
+function showAnalyzing(done){
+ var msgs=['입력하신 주제와 7가지 답변을 읽고 있습니다','6가지 리드마그넷 유형과 대조해 점수를 매기고 있습니다','가장 잘 맞는 유형을 고르고 있습니다','제목, 구성안, 랜딩 카피를 만들고 있습니다'];
+ var ov=document.createElement('div');
+ ov.id='analyzeOv';ov.setAttribute('role','status');ov.setAttribute('aria-live','polite');
+ ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;z-index:2147483100;background:var(--bg);color:var(--ink);display:flex;align-items:flex-start;justify-content:center;padding:clamp(24px,9vh,96px) 16px 24px;box-sizing:border-box;overflow:auto;font-family:var(--font-body)';
+ ov.innerHTML='<div class="card" style="max-width:880px;width:100%;text-align:center;display:flex;flex-direction:column;gap:26px;align-items:center;padding:clamp(40px,9vh,88px) clamp(20px,5vw,56px)"><div class="dots" style="transform:scale(1.8);margin:8px 0 6px"><i></i><i></i><i></i></div><h2 style="font-size:clamp(24px,4.4vw,38px);line-height:1.3;font-weight:900;letter-spacing:-.01em">질문 내용을 분석하고 있습니다</h2><p class="lead" id="anMsg" style="font-size:clamp(16px,2.4vw,20px);min-height:3.2em;margin:0;max-width:none"></p><div style="width:100%;height:12px;border-radius:8px;background:var(--bg);border:1px solid var(--line);overflow:hidden"><div id="anBar" style="height:100%;width:0;background:var(--accent);transition:width 8s linear"></div></div><p class="fine" style="margin:0;font-size:14px">내 상황에 가장 적합한 리드마그넷을 찾는 중입니다. 잠시만 기다려 주세요.</p></div>';
+ document.body.appendChild(ov);
+ try{document.body.style.overflow='hidden'}catch(e){}
+ var msgEl=document.getElementById('anMsg'),bar=document.getElementById('anBar'),i=0;
+ setTimeout(function(){bar.style.width='100%'},30);
+ function step(){
+  if(i>=msgs.length){
+   try{ov.parentNode.removeChild(ov)}catch(e){}
+   try{document.body.style.overflow=''}catch(e){}
+   done();return;
+  }
+  msgEl.textContent=msgs[i];i++;
+  setTimeout(step,2000);
+ }
+ step();
+}
+var busy=false;
+function runRecommend(e){
+ if(e&&e.preventDefault)e.preventDefault();
+ if(busy)return;
+ var er=document.getElementById('ferr'),go=document.getElementById('go');
+ try{
+  var a=readAnswers();
+  if(a.topic.length<2){er.textContent='주제를 한 문장으로 적어 주세요.';return}
+  var miss=Q.filter(function(q){return q.type==='single'&&!a[q.key]});
+  if(miss.length){er.textContent='‘'+miss[0].label+'’ 질문에 답해 주세요.';return}
+  er.textContent='';busy=true;
+  if(go){go.textContent='분석 중…';go.disabled=true}
+  showAnalyzing(function(){
+   try{showResult(a);track('start_diagnosis')}catch(err){er.textContent='오류가 발생했습니다: '+(err&&err.message?err.message:err)}
+   busy=false;if(go){go.textContent='추천 받기';go.disabled=false}
+  });
+ }catch(err){er.textContent='오류가 발생했습니다: '+(err&&err.message?err.message:err);busy=false}
+}
+form.addEventListener('submit',runRecommend);
+(function(){var go=document.getElementById('go');if(go)go.addEventListener('click',runRecommend)})();
+
+/* ───────── 초기화 (실패해도 추천 기능에는 영향 없도록 격리) ───────── */
+try{
+ var f=document.getElementById('sitefoot');
+ if(!f){f=document.createElement('footer');f.id='sitefoot';f.className='site';var wr=document.querySelector('.wrap');(wr||document.body).appendChild(f)}
+ f.innerHTML='<span>이 추천은 입력하신 답변을 규칙에 따라 점수화한 참고 결과이며, 성과를 보장하지 않습니다.</span>'+(OP.name?'<span>'+esc(OP.name)+(OP.contact?' · '+esc(OP.contact):'')+'</span>':'');
+ if(GA_ID){
+  var sc=document.createElement('script');sc.async=true;sc.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(GA_ID);document.head.appendChild(sc);
+  window.dataLayer=window.dataLayer||[];window.gtag=function(){window.dataLayer.push(arguments)};window.gtag('js',new Date());window.gtag('config',GA_ID);
+ }
+}catch(err){}
+
 </script>
 
 </body>
